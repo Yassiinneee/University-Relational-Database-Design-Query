@@ -1,0 +1,125 @@
+University Information System - XAMPP Guide
+
+Step 1: Start XAMPP
+
+-   Open XAMPP Control Panel.
+-   Start Apache and MySQL.
+
+Step 2: Open phpMyAdmin
+
+Go to: http://localhost/phpmyadmin
+
+Step 3: Create Database
+
+    CREATE DATABASE UniversityDB;
+
+Select the UniversityDB database.
+
+Step 4: Create Tables
+
+    CREATE TABLE Students (
+        student_id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        email VARCHAR(100) NOT NULL UNIQUE,
+        age INT NOT NULL,
+        CHECK (age > 17)
+    );
+
+    CREATE TABLE Instructors (
+        instructor_id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        department VARCHAR(100) NOT NULL
+    );
+
+    CREATE TABLE Courses (
+        course_id INT AUTO_INCREMENT PRIMARY KEY,
+        title VARCHAR(100) NOT NULL,
+        credits INT NOT NULL,
+        instructor_id INT NOT NULL,
+        CHECK (credits BETWEEN 1 AND 6),
+        FOREIGN KEY (instructor_id) REFERENCES Instructors(instructor_id)
+    );
+
+    CREATE TABLE Enrollments (
+        student_id INT,
+        course_id INT,
+        grade CHAR(2),
+        PRIMARY KEY(student_id, course_id),
+        FOREIGN KEY(student_id) REFERENCES Students(student_id) ON DELETE CASCADE,
+        FOREIGN KEY(course_id) REFERENCES Courses(course_id) ON DELETE CASCADE,
+        CHECK (grade IN ('A','B','C','D','F'))
+    );
+
+Step 5: Insert Sample Data
+
+Students
+
+    INSERT INTO Students (name,email,age) VALUES
+    ('Alice Johnson','alice@university.com',20),
+    ('Bob Smith','bob@university.com',22),
+    ('Charlie Brown','charlie@university.com',19);
+
+Instructors
+
+    INSERT INTO Instructors (name,department) VALUES
+    ('Dr. Ahmed','Computer Science'),
+    ('Dr. Sarah','Mathematics'),
+    ('Dr. James','Information Technology');
+
+Courses
+
+    INSERT INTO Courses (title,credits,instructor_id) VALUES
+    ('Database Systems',3,1),
+    ('Algorithms',4,1),
+    ('Calculus',3,2);
+
+Enrollments
+
+    INSERT INTO Enrollments (student_id,course_id,grade) VALUES
+    (1,1,'A'),
+    (1,2,'B'),
+    (2,1,'A'),
+    (3,3,'C');
+
+Step 6: Required Queries
+
+Students enrolled in Database Systems
+
+    SELECT s.student_id,s.name,s.email,c.title
+    FROM Students s
+    JOIN Enrollments e ON s.student_id=e.student_id
+    JOIN Courses c ON e.course_id=c.course_id
+    WHERE c.title='Database Systems';
+
+Courses with instructors
+
+    SELECT c.course_id,c.title,c.credits,
+    i.name AS instructor_name,i.department
+    FROM Courses c
+    JOIN Instructors i ON c.instructor_id=i.instructor_id;
+
+Students not enrolled
+
+    SELECT s.student_id,s.name,s.email
+    FROM Students s
+    LEFT JOIN Enrollments e
+    ON s.student_id=e.student_id
+    WHERE e.student_id IS NULL;
+
+Update student email
+
+    UPDATE Students
+    SET email='alice.johnson@university.com'
+    WHERE student_id=1;
+
+Delete course
+
+    DELETE FROM Courses
+    WHERE course_id=3;
+
+Expected Tables
+
+-   Students
+-   Instructors
+-   Courses
+-   Enrollments
